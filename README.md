@@ -1,4 +1,4 @@
-# Please the required dataset in analysis_tarined_anndata.ipynb to get respective results.
+# Please the required dataset in analysis_tarined_anndata.ipynb to get respective results(F1 scores uncertainty and UMAP Plots)
 # scDEAL documentation
 Deep Transfer Learning of Drug Sensitivity by Integrating Bulk and Single-cell RNA-seq data
 
