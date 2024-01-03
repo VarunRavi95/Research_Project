@@ -253,7 +253,7 @@ def run_main(args):
                                         optimizer=optimizer_e,loss_function=loss_function_e,load=load,
                                         n_epochs=epochs,scheduler=exp_lr_scheduler_e,save_path=bulk_encoder)
         elif reduce_model == "VAE":
-            encoder,loss_report_en = t.train_VAE_model(net=encoder,data_loaders=dataloaders_pretrain,
+            encoder,loss_report_en, _, _ = t.train_VAE_model(net=encoder,data_loaders=dataloaders_pretrain,
                             optimizer=optimizer_e,load=False,
                             n_epochs=epochs,scheduler=exp_lr_scheduler_e,save_path=bulk_encoder)
         if reduce_model == "DAE":
@@ -309,8 +309,13 @@ def run_main(args):
         #import scanpypip.utils as uti
         from captum.attr import IntegratedGradients
         #bulk_adata = bulk_adata
-        #print(bulk_adata) 
-        bulk_pre = model(bulk_X_allTensor).detach().cpu().numpy()  
+        #print(bulk_adata)
+        if reduce_model == 'VAE':
+            print(reduce_model)
+            bulk_pre = model(bulk_X_allTensor)[0].detach().cpu().numpy()
+        else:
+            print(reduce_model)
+            bulk_pre = model(bulk_X_allTensor).detach().cpu().numpy() 
         bulk_pre = bulk_pre.argmax(axis=1)
         #print(model)
         #print(bulk_pre.shape)
@@ -327,7 +332,12 @@ def run_main(args):
         np.savetxt("save/"+args.data_name+"bulk_gradient.txt",attr,delimiter = " ")
         from pandas.core.frame import DataFrame
         DataFrame(bulk_pre).to_csv("save/"+args.data_name+"bulk_lab.csv")
-    dl_result = model(X_testTensor).detach().cpu().numpy()
+    if reduce_model == 'VAE':
+        print(reduce_model)
+        dl_result = model(X_testTensor)[0].detach().cpu().numpy()
+    else:
+        print(reduce_model)
+        dl_result = model(X_testTensor).detach().cpu().numpy()
 
 
     lb_results = np.argmax(dl_result,axis=1)

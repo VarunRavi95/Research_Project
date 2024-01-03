@@ -8,6 +8,39 @@ min_var_est = 1e-8
 
 
 
+
+def loss_disc(mu_src, logvar_src, mu_tar, logvar_tar):
+    
+    
+    mu_a = mu_src
+    mu_b = mu_tar
+        # var_a = torch.exp(logvar_a)
+        # var_b = torch.exp(logvar_b)
+    var_a = torch.diag(torch.exp(logvar_src))
+    var_b = torch.diag(torch.exp(logvar_tar))
+        # var_a = torch.exp(logvar_a)
+        # var_b = torch.exp(logvar_b)
+
+
+    mu_a1 = mu_a.view(mu_a.size(0),1,-1)
+    mu_a2 = mu_a.view(1,mu_a.size(0),-1)
+    var_a1 = var_a.view(var_a.size(0),1,-1)
+    var_a2 = var_a.view(1,var_a.size(0),-1)
+
+    mu_b1 = mu_b.view(mu_b.size(0),1,-1)
+    mu_b2 = mu_b.view(1,mu_b.size(0),-1)
+    var_b1 = var_b.view(var_b.size(0),1,-1)
+    var_b2 = var_b.view(1,var_b.size(0),-1)
+
+    vaa = torch.sum(torch.div(torch.exp(torch.mul(torch.div(torch.pow(mu_a1-mu_a2,2),var_a1+var_a2),-0.5)),torch.sqrt(var_a1+var_a2)))
+    vab = torch.sum(torch.div(torch.exp(torch.mul(torch.div(torch.pow(mu_a1-mu_b2,2),var_a1+var_b2),-0.5)),torch.sqrt(var_a1+var_b2)))
+    vbb = torch.sum(torch.div(torch.exp(torch.mul(torch.div(torch.pow(mu_b1-mu_b2,2),var_b1+var_b2),-0.5)),torch.sqrt(var_b1+var_b2)))
+
+    loss = vaa+vbb-torch.mul(vab,2.0)
+    loss = loss/mu_src.shape[0]**2
+    return loss
+    
+
 def mmd_loss(x_src, x_tar,gamma=10 ^ 3):
     return mix_rbf_mmd2(x_src, x_tar, [gamma])
 

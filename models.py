@@ -306,7 +306,7 @@ class VAEBase(nn.Module):
 
         if (repram==True):
             z = self.reparameterize(mu, log_var)
-            return z
+            return z, mu, log_var
         else:
             return mu
 
@@ -601,9 +601,9 @@ class PretrainedVAEPredictor(VAEBase):
         # )
 
     def forward(self, input, **kwargs):
-        embedding = self.encode(input,repram=self.z_reparam)
+        embedding, mu, logvar = self.encode(input,repram=self.z_reparam)
         output = self.predictor(embedding)
-        return  output
+        return  output, mu, logvar
 
     def predict(self, embedding, **kwargs):
         output = self.predictor(embedding)
@@ -626,16 +626,28 @@ class DaNN(nn.Module):
         self.target_model = target_model
     '''
     def forward(self, X_source, X_target,C_target=None):
-     
+        # The source model mu and log-variance used to calculate the loss-discrepancy b/w source and target domains
+        name_src = type(self.source_model).__name__
+        # name_tar = type(self.target_model).__name__
+        if name_src == 'PretrainedVAEPredictor':
+            _, mu_src, logvar_src = self.source_model.forward(X_source)
+        
         x_src_mmd = self.source_model.encode(X_source)
 
         if(type(C_target)==type(None)):
             x_tar_mmd = self.target_model.encode(X_target)
+            if name_src == 'PretrainedVAEPredictor':
+                output = self.target_model.forward(X_target)
+                # The target model mu and log-variance used to calculate the loss-discrepancy b/w source and target domains
+                mu_tar, logvar_tar = output[2], output[3]
         else:
             x_tar_mmd = self.target_model.encode(X_target,C_target)
 
         y_src = self.source_model.predictor(x_src_mmd)
-        return y_src, x_src_mmd, x_tar_mmd
+        if name_src == 'PretrainedVAEPredictor':
+            return y_src, x_src_mmd, x_tar_mmd, mu_src, logvar_src, mu_tar, logvar_tar
+        else:
+            return y_src, x_src_mmd, x_tar_mmd
     
 
 class TargetModel(nn.Module):

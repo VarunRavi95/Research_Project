@@ -256,7 +256,7 @@ def train_VAE_model(net,data_loaders={},optimizer=None,n_epochs=100,scheduler=No
                     best_model_wts = copy.deepcopy(net.state_dict())
                 else:
                     torch.save(net.state_dict(), save_path+"_bestcahce.pkl")
-    
+    mu, logvar = output[2],output[3]
     # Select best model wts if use memory to cahce models
     if best_model_cache == "memory":
         torch.save(best_model_wts, save_path)
@@ -265,7 +265,7 @@ def train_VAE_model(net,data_loaders={},optimizer=None,n_epochs=100,scheduler=No
         net.load_state_dict((torch.load(save_path+"_bestcahce.pkl")))
         torch.save(net.state_dict(), save_path)
 
-    return net, loss_train
+    return net, loss_train, mu, logvar
 
 def train_CVAE_model(net,data_loaders={},optimizer=None,n_epochs=100,scheduler=None,load=False,save_path="model.pkl",best_model_cache = "drive"):
     
@@ -362,7 +362,7 @@ def train_CVAE_model(net,data_loaders={},optimizer=None,n_epochs=100,scheduler=N
     return net, loss_train
 
 def train_predictor_model(net,data_loaders,optimizer,loss_function,n_epochs,scheduler,load=False,save_path="model.pkl"):
-
+    name = type(net).__name__
     if(load!=False):
         if(os.path.exists(save_path)):
             net.load_state_dict(torch.load(save_path))           
@@ -401,8 +401,13 @@ def train_predictor_model(net,data_loaders,optimizer,loss_function,n_epochs,sche
             for batchidx, (x, y) in enumerate(data_loaders[phase]):
 
                 x.requires_grad_(True)
-                # encode and decode 
-                output = net(x)
+                # encode and decode
+                if name == 'PretrainedPredictor':
+                    print(name)
+                    output = net(x)
+                else:
+                    print(name)
+                    output,mu,logvar = net(x)
                 # compute loss
                 loss = loss_function(output, y)      
 
@@ -751,7 +756,7 @@ def train_DaNN_model2(net,source_loader,target_loader,
     
     dataset_sizes = {x: source_loader[x].dataset.tensors[0].shape[0] for x in ['train', 'val']}
     loss_train = {}
-    mmd_train = {}
+    disc_train = {}
     sc_train = {}
     best_model_wts = copy.deepcopy(net.state_dict())
     best_loss = np.inf
@@ -774,7 +779,7 @@ def train_DaNN_model2(net,source_loader,target_loader,
                 net.eval()  # Set model to evaluate mode
 
             running_loss = 0.0
-            running_mmd = 0.0
+            running_disc = 0.0
             running_sc =0.0
             
             batch_j = 0
@@ -803,7 +808,10 @@ def train_DaNN_model2(net,source_loader,target_loader,
                 if(net.target_model._get_name()=="CVAEBase"):
                     y_pre, x_src_mmd, x_tar_mmd = net(x_src, x_tar,y_tar)
                 else:
-                    y_pre, x_src_mmd, x_tar_mmd = net(x_src, x_tar)
+                    if(net.target_model._get_name()=="VAEBase"):
+                        y_pre, x_src_mmd, x_tar_mmd, mu_src, logvar_src, mu_tar, logvar_tar = net(x_src, x_tar)
+                    else:
+                        y_pre, x_src_mmd, x_tar_mmd = net(x_src, x_tar)
                 # compute loss
                 encoderrep = net.target_model.encoder(x_tar)
                 #print(x_tar.shape)
@@ -825,12 +833,15 @@ def train_DaNN_model2(net,source_loader,target_loader,
                     else:
                         loss_s = torch.tensor(loss_s).cpu()
                     loss_s.requires_grad_(True)
-                    loss_c = loss_function(y_pre, y_src)      
-                    loss_mmd = dist_loss(x_src_mmd, x_tar_mmd)
-                    #print(loss_s,loss_c,loss_mmd)
+                    loss_c = loss_function(y_pre, y_src)
+                    
+                    if(net.target_model._get_name()=="VAEBase"):      
+                        loss_domain = dist_loss(x_src_mmd, x_tar_mmd, mu_src, logvar_src, mu_tar, logvar_tar)
+                    else:
+                        loss_domain = dist_loss(x_src_mmd, x_tar_mmd)
     
-                    loss = loss_c + weight * loss_mmd +loss_s
-    
+                    loss = loss_c + weight * loss_domain +loss_s
+                    print(loss_domain)
     
                     # zero the parameter (weight) gradients
                     optimizer.zero_grad()
@@ -843,7 +854,7 @@ def train_DaNN_model2(net,source_loader,target_loader,
     
                     # print loss statistics
                     running_loss += loss.item()
-                    running_mmd += loss_mmd.item()
+                    running_disc += loss_domain.item()
                     running_sc += loss_s.item()
                     # Iterate over batch
                     batch_j += 1
@@ -852,7 +863,7 @@ def train_DaNN_model2(net,source_loader,target_loader,
 
             # Average epoch loss
             epoch_loss = running_loss / n_iters
-            epoch_mmd = running_mmd/n_iters
+            epoch_disc = running_disc/n_iters
             epoch_sc = running_sc/n_iters
             # Step schedular
             if phase == 'train':
@@ -861,7 +872,7 @@ def train_DaNN_model2(net,source_loader,target_loader,
             # Savle loss
             last_lr = scheduler.optimizer.param_groups[0]['lr']
             loss_train[epoch,phase] = epoch_loss
-            mmd_train[epoch,phase] = epoch_mmd
+            disc_train[epoch,phase] = epoch_disc
             sc_train[epoch,phase] = epoch_sc
             
             logging.info('{} Loss: {:.8f}. Learning rate = {}'.format(phase, epoch_loss,last_lr))
@@ -887,4 +898,4 @@ def train_DaNN_model2(net,source_loader,target_loader,
         net.load_state_dict((torch.load(save_path+"_bestcahce.pkl")))
         torch.save(net.state_dict(), save_path)
 
-    return net, loss_train,mmd_train,sc_train    
+    return net, loss_train,disc_train,sc_train    

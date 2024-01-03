@@ -405,7 +405,7 @@ def run_main(args):
                                             n_epochs=epochs,scheduler=exp_lr_scheduler_e,save_path=sc_encoder_path)
                                             
             elif reduce_model == "VAE":
-                encoder,loss_report_en = t.train_VAE_model(net=encoder,data_loaders=dataloaders_pretrain,
+                encoder,loss_report_en,_, _ = t.train_VAE_model(net=encoder,data_loaders=dataloaders_pretrain,
                                 optimizer=optimizer_e,load=False,
                                 n_epochs=epochs,scheduler=exp_lr_scheduler_e,save_path=sc_encoder_path)
             #print(loss_report_en)
@@ -437,10 +437,15 @@ def run_main(args):
     DaNN_model = DaNN(source_model=source_encoder,target_model=encoder,fix_source=bool(args.fix_source))
     DaNN_model.to(device)
 
-    # Set distribution loss 
-    def loss(x,y,GAMMA=args.mmd_GAMMA):
-        result = mmd.mmd_loss(x,y,GAMMA)
-        return result
+    # Set distribution loss
+    if reduce_model == 'VAE': 
+        def loss(x, y, mu_src, logvar_src, mu_tar, logvar_tar):
+            result = mmd.loss_disc(mu_src, logvar_src, mu_tar, logvar_tar)
+            return result
+    else:
+        def loss(x, y):
+            result = mmd.mmd_loss(x, y)
+            return result
 
     loss_disrtibution = loss
      
@@ -522,9 +527,11 @@ def run_main(args):
     adata.write("save/adata/"+data_name+para+".h5ad")
 ################################################# END SECTION OF ANALYSIS FOR scRNA-Seq DATA #################################################
     from sklearn.metrics import (average_precision_score,
-                             classification_report, mean_squared_error, r2_score, roc_auc_score)
+                             classification_report, mean_squared_error, r2_score, roc_auc_score, f1_score)
     report_df = {}
+    # print(adata.obs)
     Y_test = adata.obs['sensitive']
+    print('Shape of Y_test:', Y_test.shape)
     sens_pb_results = adata.obs['sens_preds']
     lb_results = adata.obs['sens_label']
     
@@ -533,12 +540,73 @@ def run_main(args):
     
     report_dict = classification_report(Y_test, lb_results, output_dict=True)
     f1score = report_dict['weighted avg']['f1-score']
+    accuracy = report_dict['accuracy']
     report_df['f1_score'] = f1score
     file = 'save/bulk_f'+data_name+'_f1_score_ori.txt'
-    with open(file, 'a+') as f:
-         f.write(para+'\t'+str(f1score)+'\n') 
+    file2 = 'save/bulk_f'+data_name+'_accuracy_ori.txt'
+    file3 = 'save/bulk_f'+data_name+'f1_scores.xlsx'
+    file4 = 'save/bulk_f'+data_name+'latent_mu.xlsx'
+    num_samples = 1000
+
+# Placeholder for F1 scores
+    f1_scores = []
+    if reduce_model == 'DAE':
+        with open(file, 'a+') as f:
+            f.write(para+'\t'+str(f1score)+'\n') 
+        with open(file2, 'a+') as f:
+            f.write(para+'\t'+str(accuracy)+'\n')
+    elif reduce_model == "VAE":
+        for _ in range(num_samples):
+            _, latent_mean, latent_logvar = encoder.encode(X_allTensor,repram=True)
+            latent_sample = encoder.reparameterize(latent_mean, latent_logvar)
+            sample_prediction = source_model.predictor(latent_sample).detach().cpu().numpy()
+            sample_prediction_label = np.argmax(sample_prediction, axis=1)
+
+            # Decode the latent variable to get multiple samples for gene expressions
+            # decoded_samples = encoder.decode(latent_sample).detach().cpu().numpy()
+
+            # Assuming that 'sens_preds' is the response variable in adata.obs
+            # response_samples = adata.obs['sens_preds'].values
+
+            # Compute F1 score for the sample
+            sample_f1_score = f1_score(Y_test, sample_prediction_label, average='weighted')
+            f1_scores.append(sample_f1_score)
+        
+        # print(f1_scores)
+        # Calculate confidence intervals
+        lower_bound = np.percentile(f1_scores, 2.5)
+        upper_bound = np.percentile(f1_scores, 97.5)
+        results_df = pd.DataFrame({
+        'F1 Score': f1_scores,
+        })
+        latent_mu_array = latent_mean.detach().cpu().numpy()
+        latent_mu_df = pd.DataFrame(latent_mu_array)
+        results_df['Lower Bound'] = lower_bound
+        results_df['Upper Bound'] = upper_bound
+        
+        with open(file, 'a+') as f:
+            f.write(para+'\t'+str(f1score)+'\n') 
+        with open(file2, 'a+') as f:
+            f.write(para+'\t'+str(accuracy)+'\n')
+            
+        if not os.path.isfile(file3):
+        # If it doesn't exist, create a new file and write the DataFrame to it
+            results_df.to_excel(file3, index=False)
+            # latent_mu_df.to_excel(file4, index=False)
+        else:
+        # If it already exists, open the existing file and overwrite the DataFrame in it
+            results_df.to_excel(file3, index=False)
+            # latent_mu_df.to_excel(file4, index=False)
+        
+        if not os.path.isfile(file4):
+        # If it doesn't exist, create a new file and write the DataFrame to it
+            latent_mu_df.to_excel(file4, index=False)
+        else:
+        # If it already exists, open the existing file and overwrite the DataFrame in it
+            latent_mu_df.to_excel(file4, index=False)
     print("sc model finished")
     # If print gene is true, then print gene
+    
     if (args.printgene=='T'):
 
         # Set up the TargetModel

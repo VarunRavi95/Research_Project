@@ -450,6 +450,8 @@ def de_score(adata,clustername,pval=0.05,n=50,method="wilcoxon",score_prefix=Non
         select_df = df.iloc[:n,:]
         if pval!=None:
             select_df = select_df.loc[df.pvals_adj < pval]
+        
+        
         sc.tl.score_genes(adata, select_df.names,score_name=str(cluster)+"_score" )
     return adata
 
