@@ -51,7 +51,7 @@ def save_arguments(args,now):
         args_dict[items[0]] = items[1]
 
     args_df = pd.DataFrame(args_dict,index=[now]).T
-    args_df.to_csv("C:/Users/Varun/Desktop/LiU_STIMA/Semester_3/Research_Project/scDEAL/save/logs/arguments_" +now + '.csv')
+    args_df.to_csv("save/logs/arguments_" +now + '.csv')
 
     return args_df
 
@@ -73,7 +73,7 @@ def plot_label_hist(Y,save=None):
         plt.savefig(save)
 
 # plot no skill and model roc curves
-def plot_roc_curve(test_y,naive_probs,model_probs,title="",path="C:/Users/Varun/Desktop/LiU_STIMA/Semester_3/Research_Project/scDEAL/save/figures/roc_curve.pdf"):
+def plot_roc_curve(test_y,naive_probs,model_probs,title="",path="save/figures/roc_curve.pdf"):
 
     # plot naive skill roc curve
     fpr, tpr, _ = roc_curve(test_y, naive_probs)
@@ -96,7 +96,7 @@ def plot_roc_curve(test_y,naive_probs,model_probs,title="",path="C:/Users/Varun/
     plt.close() 
 
 # plot no skill and model precision-recall curves
-def plot_pr_curve(test_y,model_probs,selected_label = 1,title="",path="C:/Users/Varun/Desktop/LiU_STIMA/Semester_3/Research_Project/scDEAL/save/figures/prc_curve.pdf"):
+def plot_pr_curve(test_y,model_probs,selected_label = 1,title="",path="save/figures/prc_curve.pdf"):
     # calculate the no skill line as the proportion of the positive class
     no_skill = len(test_y[test_y==selected_label]) / len(test_y)
     # plot the no skill precision-recall curve
@@ -229,7 +229,7 @@ def process_122843(adata,**kargs):
     return adata
 def process_110894(adata,**kargs):
     # Data specific preprocessing of cell info
-    file_name = 'C:/Users/Varun/Desktop/LiU_STIMA/Semester_3/Research_Project/scDEAL/data/GSE110894/GSE110894_CellInfo.xlsx' # change it to the name of your excel file
+    file_name = 'data/GSE110894/GSE110894_CellInfo.xlsx' # change it to the name of your excel file
     df_cellinfo = read_excel(file_name,header=3)
     df_cellinfo=df_cellinfo.dropna(how="all")
     df_cellinfo = df_cellinfo.fillna(method='pad')
@@ -395,8 +395,8 @@ def integrated_gradient_check(net,input,target,adata,n_genes,target_class=1,test
         df_top_genes['pval']=top_pvals
         df_tail_genes['pval']=tail_pvals
 
-        df_top_genes.to_csv("C:/Users/Varun/Desktop/LiU_STIMA/Semester_3/Research_Project/scDEAL/save/results/top_genes_class" +str(target_class)+ save_name + '.csv')
-        df_tail_genes.to_csv("C:/Users/Varun/Desktop/LiU_STIMA/Semester_3/Research_Project/scDEAL/save/results/top_genes_class" +str(target_class)+ save_name + '.csv')
+        df_top_genes.to_csv("save/results/top_genes_class" +str(target_class)+ save_name + '.csv')
+        df_tail_genes.to_csv("save/results/top_genes_class" +str(target_class)+ save_name + '.csv')
 
         return adata,attr,df_top_genes,df_tail_genes
 
@@ -431,7 +431,7 @@ def integrated_gradient_differential(net,input,target,adata,n_genes=None,target_
             try:
                 df_degs = ut.get_de_dataframe(igadata,label)
                 df_degs = df_degs.loc[(df_degs.pvals_adj<ig_pval) & (df_degs.logfoldchanges>=ig_fc)]
-                df_degs.to_csv("C:/Users/Varun/Desktop/LiU_STIMA/Semester_3/Research_Project/scDEAL/save/results/DIG_class_" +str(target_class)+"_"+str(label)+ save_name + '.csv')
+                df_degs.to_csv("save/results/DIG_class_" +str(target_class)+"_"+str(label)+ save_name + '.csv')
 
                 df_results[label]= df_degs
             except:
@@ -455,7 +455,7 @@ def de_score(adata,clustername,pval=0.05,n=50,method="wilcoxon",score_prefix=Non
         sc.tl.score_genes(adata, select_df.names,score_name=str(cluster)+"_score" )
     return adata
 
-def plot_loss(report,path="C:/Users/Varun/Desktop/LiU_STIMA/Semester_3/Research_Project/scDEAL/save/results/loss.pdf",set_ylim=False):
+def plot_loss(report,path="save/results/loss.pdf",set_ylim=False):
 
     train_loss = []
     val_loss = []
@@ -513,7 +513,7 @@ def integrated_gradient_differential(net,input,target,adata,n_genes=None,target_
             try:
                 df_degs = ut.get_de_dataframe(igadata,label)
                 df_degs = df_degs.loc[(df_degs.pvals_adj<ig_pval) & (df_degs.logfoldchanges>=ig_fc)]
-                df_degs.to_csv("C:/Users/Varun/Desktop/LiU_STIMA/Semester_3/Research_Project/scDEAL/save/results/DIG_class_" +str(target_class)+"_"+str(label)+ save_name + '.csv')
+                df_degs.to_csv("save/results/DIG_class_" +str(target_class)+"_"+str(label)+ save_name + '.csv')
 
                 df_results[label]= df_degs
             except:
