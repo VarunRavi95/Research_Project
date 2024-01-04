@@ -1,3 +1,4 @@
+# IMPORTANT NOTE: Replace --device gpu with cpu if there is no access to gpu.
 Dataset 1
 Original: 
 python bulkmodel.py --drug "I.BET.762" --device gpu --dimreduce "DAE" --encoder_h_dims "256,128" --predictor_h_dims "128,64" --bottleneck 512 --data_name "GSE110894" --sampling "upsampling" --dropout 0.1 --lr 0.5 --printgene "F" -mod "new" --checkpoint "False"
@@ -35,7 +36,7 @@ Dataset 4
 Original:
 python bulkmodel.py --drug "CISPLATIN" --device gpu --dimreduce "DAE" --encoder_h_dims "512,256" --predictor_h_dims "256,128" --bottleneck 256 --data_name "GSE117872_HN137" --sampling "upsampling" --dropout 0.3 --lr 0.01 --printgene "F" -mod "new" --checkpoint "False"
 
-python scmodel.py --sc_data "GSE117872_HN137" --device gpu --dimreduce "DAE" --drug "CISPLATIN" --bulk_h_dims "512,256" --bottleneck 256 --predictor_h_dims "256,128" --dropout 0.3 --printgene "F" -mod "new" --lr 0.01 --sampling "upsampling" --printgene "T" -mod "new" --checkpoint "False"
+python scmodel.py --sc_data "GSE117872_HN137" --device gpu --dimreduce "DAE" --drug "CISPLATIN" --bulk_h_dims "512,256" --bottleneck 256 --predictor_h_dims "256,128" --dropout 0.3 --printgene "F" -mod "new" --lr 0.01 --sampling "upsampling" --printgene "F" -mod "new" --checkpoint "False"
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Modified:
 python bulkmodel.py --drug "CISPLATIN" --device gpu --dimreduce "VAE" --encoder_h_dims "512,256" --predictor_h_dims "256,128" --bottleneck 256 --VAErepram 1 --data_name "GSE117872_HN137" --sampling "upsampling" --dropout 0.3 --lr 0.01 --printgene "F" -mod "new" --checkpoint "False"
