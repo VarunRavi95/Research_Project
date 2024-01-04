@@ -1,0 +1,54 @@
+Dataset 1
+Original: 
+python bulkmodel.py --drug "I.BET.762" --device gpu --dimreduce "DAE" --encoder_h_dims "256,128" --predictor_h_dims "128,64" --bottleneck 512 --data_name "GSE110894" --sampling "upsampling" --dropout 0.1 --lr 0.5 --printgene "F" -mod "new" --checkpoint "False"
+
+python scmodel.py --sc_data "GSE110894" --device gpu --dimreduce "DAE" --drug "I.BET.762" --bulk_h_dims "256,128" --bottleneck 512 --predictor_h_dims "128,64" --dropout 0.1 --printgene "F" -mod "new" --lr 0.5 --sampling "upsampling" --printgene "F" -mod "new" --checkpoint "False"
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Modified:
+python bulkmodel.py --drug "I.BET.762" --device gpu --dimreduce "VAE" --encoder_h_dims "256,128" --predictor_h_dims "128,64" --bottleneck 512 --VAErepram 1 --data_name "GSE110894" --sampling "upsampling" --dropout 0.1 --lr 0.5 --printgene "F" -mod "new" --checkpoint "False"
+
+python scmodel.py --sc_data "GSE110894" --device gpu --dimreduce "VAE" --drug "I.BET.762" --bulk_h_dims "256,128" --bottleneck 512 --VAErepram 1  --predictor_h_dims "128,64" --dropout 0.1 --printgene "F" -mod "new" --lr 0.5 --sampling "upsampling" --printgene "F" -mod "new" --checkpoint "False"
+
+Dataset 2
+Original:
+python bulkmodel.py --drug "GEFITINIB" --device gpu --dimreduce "DAE" --encoder_h_dims "512,256" --predictor_h_dims "256,128" --bottleneck 256 --data_name "GSE112274" --sampling "no" --dropout 0.1 --lr 0.5 --printgene "F" -mod "new" --checkpoint "False"
+
+python scmodel.py --sc_data "GSE112274" --device gpu --dimreduce "DAE" --drug "GEFITINIB" --bulk_h_dims "512,256" --bottleneck 256 --predictor_h_dims "256,128" --dropout 0.1 --printgene "F" -mod "new" --lr 0.5 --sampling "no" --printgene "F" -mod "new" --checkpoint "False"
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Modified:
+python bulkmodel.py --drug "GEFITINIB" --device gpu --dimreduce "VAE" --encoder_h_dims "512,256" --predictor_h_dims "256,128" --bottleneck 256 --VAErepram 1 --data_name "GSE112274" --sampling "no" --dropout 0.1 --lr 0.5 --printgene "F" -mod "new" --checkpoint "False"
+
+python scmodel.py --sc_data "GSE112274" --device gpu --dimreduce "VAE" --drug "GEFITINIB" --bulk_h_dims "512,256" --bottleneck 256 --VAErepram 1  --predictor_h_dims "256,128" --dropout 0.1 --printgene "F" -mod "new" --lr 0.5 --sampling "no" --printgene "F" -mod "new" --checkpoint "False"
+
+Dataset 3
+Original:
+python bulkmodel.py --drug "CISPLATIN" --device gpu --dimreduce "DAE" --encoder_h_dims "256,128" --predictor_h_dims "128,64" --bottleneck 512 --data_name "GSE117872_HN120" --sampling "SMOTE" --dropout 0.3 --lr 0.01 --printgene "F" -mod "new" --checkpoint "False"
+
+python scmodel.py --sc_data "GSE117872_HN120" --device gpu --dimreduce "DAE" --drug "CISPLATIN" --bulk_h_dims "256,128" --bottleneck 512 --predictor_h_dims "128,64" --dropout 0.3 --printgene "F" -mod "new" --lr 0.01 --sampling "SMOTE" --printgene "F" -mod "new" --checkpoint "False"
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Modified:
+python bulkmodel.py --drug "CISPLATIN" --device gpu --dimreduce "VAE" --encoder_h_dims "256,128" --predictor_h_dims "128,64" --bottleneck 512 --VAErepram 1 --data_name "GSE117872_HN120" --sampling "SMOTE" --dropout 0.3 --lr 0.01 --printgene "F" -mod "new" --checkpoint "False"
+
+python scmodel.py --sc_data "GSE117872_HN120" --device gpu --dimreduce "VAE" --drug "CISPLATIN" --bulk_h_dims "256,128" --bottleneck 512 --VAErepram 1  --predictor_h_dims "128,64" --dropout 0.3 --printgene "F" -mod "new" --lr 0.01 --sampling "SMOTE" --printgene "F" -mod "new" --checkpoint "False"
+
+Dataset 4
+Original:
+python bulkmodel.py --drug "CISPLATIN" --device gpu --dimreduce "DAE" --encoder_h_dims "512,256" --predictor_h_dims "256,128" --bottleneck 256 --data_name "GSE117872_HN137" --sampling "upsampling" --dropout 0.3 --lr 0.01 --printgene "F" -mod "new" --checkpoint "False"
+
+python scmodel.py --sc_data "GSE117872_HN137" --device gpu --dimreduce "DAE" --drug "CISPLATIN" --bulk_h_dims "512,256" --bottleneck 256 --predictor_h_dims "256,128" --dropout 0.3 --printgene "F" -mod "new" --lr 0.01 --sampling "upsampling" --printgene "T" -mod "new" --checkpoint "False"
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Modified:
+python bulkmodel.py --drug "CISPLATIN" --device gpu --dimreduce "VAE" --encoder_h_dims "512,256" --predictor_h_dims "256,128" --bottleneck 256 --VAErepram 1 --data_name "GSE117872_HN137" --sampling "upsampling" --dropout 0.3 --lr 0.01 --printgene "F" -mod "new" --checkpoint "False"
+
+python scmodel.py --sc_data "GSE117872_HN137" --device gpu --dimreduce "VAE" --drug "CISPLATIN" --bulk_h_dims "512,256" --bottleneck 256 --VAErepram 1  --predictor_h_dims "256,128" --dropout 0.3 --printgene "F" -mod "new" --lr 0.01 --sampling "upsampling" --printgene "F" -mod "new" --checkpoint "False"
+
+Dataset 5
+Original:
+python bulkmodel.py --drug "DOCETAXEL" --device gpu --dimreduce "DAE" --encoder_h_dims "256,128" --predictor_h_dims "256,128" --bottleneck 512 --data_name "GSE140440" --sampling "upsampling" --dropout 0.1 --lr 0.01 --printgene "F" -mod "new" --checkpoint "False"
+
+python scmodel.py --sc_data "GSE140440" --device gpu --dimreduce "DAE" --drug "DOCETAXEL" --bulk_h_dims "256,128" --bottleneck 512 --predictor_h_dims "256,128" --dropout 0.1 --printgene "F" -mod "new" --lr 0.01 --sampling "upsampling" --printgene "F" -mod "new" --checkpoint "False"
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Modified:
+python bulkmodel.py --drug "DOCETAXEL" --device gpu --dimreduce "VAE" --encoder_h_dims "256,128" --predictor_h_dims "256,128" --bottleneck 512 --VAErepram 1 --data_name "GSE140440" --sampling "upsampling" --dropout 0.1 --lr 0.01 --printgene "F" -mod "new" --checkpoint "False"
+
+python scmodel.py --sc_data "GSE140440" --device gpu --dimreduce "VAE" --drug "DOCETAXEL" --bulk_h_dims "256,128" --bottleneck 512 --VAErepram 1  --predictor_h_dims "256,128" --dropout 0.1 --printgene "F" -mod "new" --lr 0.01 --sampling "upsampling" --printgene "F" -mod "new" --checkpoint "False"
