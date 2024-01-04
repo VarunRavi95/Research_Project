@@ -1,7 +1,7 @@
 # Please use the required dataset in analysis_tarined_anndata.ipynb to get respective results(F1 scores uncertainty and UMAP Plots)
 ## Please Download the data from the link below and save it in a folder called "data".
 ## Alternatively, a similar folder structure as shown below needs to be set up in order to be able to reproduce the code in the repository. For eg. a "save" folder needs to be created along with "data".
-
+## To train the models from scratch please follow the instructions below as mentioned by the authors.
 # scDEAL documentation
 
 
